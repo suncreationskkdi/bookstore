@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { BookOpen, Download, ShoppingCart, Headphones, ChevronDown } from 'lucide-react';
+import { BookOpen, Download, ShoppingCart, Headphones, FileText, ExternalLink } from 'lucide-react';
 import { BookWithFormats } from '../lib/supabase';
 
 interface BookCardProps {
@@ -11,7 +10,6 @@ interface BookCardProps {
 }
 
 export default function BookCard({ book, onPurchase, onDownload, onViewDetails, showAllFormats }: BookCardProps) {
-  const [showDropdown, setShowDropdown] = useState(false);
   const physicalFormat = book.formats.find(f => f.format_type === 'physical');
   const ebookFormats = book.formats.filter(f => f.format_type === 'ebook');
   const audiobookFormats = book.formats.filter(f => f.format_type === 'audiobook');
@@ -74,45 +72,48 @@ export default function BookCard({ book, onPurchase, onDownload, onViewDetails, 
           )}
 
           {(showAllFormats || ebookFormats.length > 0) && ebookFormats.length > 0 && (
-            <div className="border-t pt-3 relative">
+            <div className="border-t pt-3">
               <div className="flex items-center space-x-2 mb-3">
                 <BookOpen className="h-5 w-5 text-green-500" />
                 <span className="font-semibold text-slate-700">Ebook - FREE</span>
               </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDropdown(!showDropdown);
-                }}
-                className="w-full bg-green-500 text-white py-2 rounded-lg font-medium hover:bg-green-600 transition flex items-center justify-center space-x-2"
-              >
-                <Download className="h-4 w-4" />
-                <span>Download</span>
-                <ChevronDown className="h-4 w-4" />
-              </button>
-              {showDropdown && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg">
-                  {ebookFormats.map((format) => {
-                    const fileFormat = format.file_format?.toLowerCase();
-                    const displayName = fileFormat === 'html' ? 'Read Online' : format.file_format?.toUpperCase();
+              <div className="flex items-center justify-center space-x-2">
+                {ebookFormats.map((format) => {
+                  const fileFormat = format.file_format?.toLowerCase();
+                  let icon;
+                  let label;
 
-                    return (
-                      <button
-                        key={format.id}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDownload?.(format.id, format.file_url || '', format.file_format || '');
-                          setShowDropdown(false);
-                        }}
-                        disabled={!format.is_available}
-                        className="w-full px-4 py-2 text-left hover:bg-slate-50 transition disabled:opacity-50 disabled:cursor-not-allowed border-b last:border-b-0 border-slate-100"
-                      >
-                        <span className="text-slate-700 font-medium">{displayName}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                  if (fileFormat === 'pdf') {
+                    icon = <FileText className="h-6 w-6" />;
+                    label = 'PDF';
+                  } else if (fileFormat === 'epub') {
+                    icon = <Download className="h-6 w-6" />;
+                    label = 'EPUB';
+                  } else if (fileFormat === 'html') {
+                    icon = <ExternalLink className="h-6 w-6" />;
+                    label = 'Read';
+                  } else {
+                    icon = <Download className="h-6 w-6" />;
+                    label = format.file_format?.toUpperCase();
+                  }
+
+                  return (
+                    <button
+                      key={format.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDownload?.(format.id, format.file_url || '', format.file_format || '');
+                      }}
+                      disabled={!format.is_available}
+                      className="flex-1 bg-green-500 text-white py-3 px-2 rounded-lg font-medium hover:bg-green-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex flex-col items-center justify-center space-y-1"
+                      title={fileFormat === 'html' ? 'Read Online' : `Download ${format.file_format?.toUpperCase()}`}
+                    >
+                      {icon}
+                      <span className="text-xs">{label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
 
