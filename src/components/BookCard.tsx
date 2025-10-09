@@ -38,100 +38,11 @@ export default function BookCard({ book, onPurchase, onDownload, onViewDetails, 
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="p-4">
         <h3 className="text-lg font-bold text-slate-800 mb-1 line-clamp-2">
           {book.title}
         </h3>
-        <p className="text-slate-600 text-sm mb-4">{book.author}</p>
-
-        <div className="space-y-3">
-          {(showAllFormats || physicalFormat) && physicalFormat && (
-            <div className="border-t pt-3">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <ShoppingCart className="h-5 w-5 text-blue-500" />
-                  <span className="font-semibold text-slate-700">Physical Book</span>
-                </div>
-                <span className="text-lg font-bold text-blue-600">
-                  ${physicalFormat.price.toFixed(2)}
-                </span>
-              </div>
-              {physicalFormat.stock_quantity !== undefined && (
-                <p className="text-sm text-slate-500 mb-2">
-                  Stock: {physicalFormat.stock_quantity} available
-                </p>
-              )}
-              <button
-                onClick={() => onPurchase?.(book.id)}
-                disabled={!physicalFormat.is_available}
-                className="w-full bg-blue-500 text-white py-2 rounded-lg font-medium hover:bg-blue-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed"
-              >
-                {physicalFormat.is_available ? 'Add to Cart' : 'Out of Stock'}
-              </button>
-            </div>
-          )}
-
-          {(showAllFormats || ebookFormats.length > 0) && ebookFormats.length > 0 && (
-            <div className="border-t pt-3">
-              <div className="flex items-center space-x-2 mb-3">
-                <BookOpen className="h-5 w-5 text-green-500" />
-                <span className="font-semibold text-slate-700">Ebook - FREE</span>
-              </div>
-              <div className="flex items-center justify-center space-x-2">
-                {ebookFormats.map((format) => {
-                  const fileFormat = format.file_format?.toLowerCase();
-                  let label;
-
-                  if (fileFormat === 'pdf') {
-                    label = 'PDF';
-                  } else if (fileFormat === 'epub') {
-                    label = 'EPUB';
-                  } else if (fileFormat === 'html') {
-                    label = 'Read Online';
-                  } else {
-                    label = format.file_format?.toUpperCase();
-                  }
-
-                  return (
-                    <button
-                      key={format.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDownload?.(format.id, format.file_url || '', format.file_format || '');
-                      }}
-                      disabled={!format.is_available}
-                      className="flex-1 bg-green-500 text-white py-2 px-2 rounded-lg font-medium hover:bg-green-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed text-sm"
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {(showAllFormats || audiobookFormats.length > 0) && audiobookFormats.length > 0 && (
-            <div className="border-t pt-3">
-              <div className="flex items-center space-x-2 mb-3">
-                <Headphones className="h-5 w-5 text-orange-500" />
-                <span className="font-semibold text-slate-700">Audiobook - FREE</span>
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (audiobookFormats[0]) {
-                    onDownload?.(audiobookFormats[0].id, audiobookFormats[0].file_url || '', audiobookFormats[0].file_format || '');
-                  }
-                }}
-                disabled={!audiobookFormats[0]?.is_available}
-                className="w-full bg-orange-500 text-white py-2 rounded-lg font-medium hover:bg-orange-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-              >
-                <Download className="h-4 w-4" />
-                <span>Download</span>
-              </button>
-            </div>
-          )}
-        </div>
+        <p className="text-slate-600 text-sm">{book.author}</p>
       </div>
     </div>
   );
