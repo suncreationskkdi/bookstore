@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import BookCard from './BookCard';
+import BookDetailModal from './BookDetailModal';
 import { BookWithFormats } from '../lib/supabase';
 
 interface BooksViewProps {
@@ -12,6 +13,7 @@ interface BooksViewProps {
 
 export default function BooksView({ books, formatFilter, onPurchase, onDownload }: BooksViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedBook, setSelectedBook] = useState<BookWithFormats | null>(null);
 
   const filteredBooks = books
     .filter(book => book.formats.some(f => f.format_type === formatFilter))
@@ -84,6 +86,7 @@ export default function BooksView({ books, formatFilter, onPurchase, onDownload 
                   book={book}
                   onPurchase={onPurchase}
                   onDownload={onDownload}
+                  onViewDetails={setSelectedBook}
                   showAllFormats={false}
                 />
               ))}
@@ -91,6 +94,15 @@ export default function BooksView({ books, formatFilter, onPurchase, onDownload 
           </>
         )}
       </div>
+
+      {selectedBook && (
+        <BookDetailModal
+          book={selectedBook}
+          onClose={() => setSelectedBook(null)}
+          onPurchase={onPurchase}
+          onDownload={onDownload}
+        />
+      )}
     </div>
   );
 }

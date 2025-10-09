@@ -1,72 +1,50 @@
-import { BookOpen, Download, ShoppingCart, Headphones, FileText, Link2, ExternalLink } from 'lucide-react';
+import { useState } from 'react';
+import { BookOpen, Download, ShoppingCart, Headphones, ChevronDown } from 'lucide-react';
 import { BookWithFormats } from '../lib/supabase';
 
 interface BookCardProps {
   book: BookWithFormats;
   onPurchase?: (bookId: string) => void;
   onDownload?: (formatId: string, url: string, fileFormat?: string) => void;
+  onViewDetails?: (book: BookWithFormats) => void;
   showAllFormats?: boolean;
 }
 
-export default function BookCard({ book, onPurchase, onDownload, showAllFormats }: BookCardProps) {
+export default function BookCard({ book, onPurchase, onDownload, onViewDetails, showAllFormats }: BookCardProps) {
+  const [showDropdown, setShowDropdown] = useState(false);
   const physicalFormat = book.formats.find(f => f.format_type === 'physical');
   const ebookFormats = book.formats.filter(f => f.format_type === 'ebook');
   const audiobookFormats = book.formats.filter(f => f.format_type === 'audiobook');
 
-  const hasMultipleFormats = book.formats.length > 1;
-
-  const formatIcon = (formatType: string) => {
-    switch (formatType) {
-      case 'physical':
-        return <ShoppingCart className="h-4 w-4" />;
-      case 'ebook':
-        return <BookOpen className="h-4 w-4" />;
-      case 'audiobook':
-        return <Headphones className="h-4 w-4" />;
-      default:
-        return <FileText className="h-4 w-4" />;
-    }
-  };
-
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
-      <div className="relative">
+      <div
+        className="relative cursor-pointer group"
+        onClick={() => onViewDetails?.(book)}
+      >
         {book.cover_image_url ? (
           <img
             src={book.cover_image_url}
             alt={book.title}
-            className="w-full h-64 object-cover"
+            className="w-full h-80 object-contain bg-gradient-to-br from-slate-50 to-slate-100"
           />
         ) : (
-          <div className="w-full h-64 bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
+          <div className="w-full h-80 bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
             <BookOpen className="h-24 w-24 text-slate-400" />
           </div>
         )}
-        {hasMultipleFormats && (
-          <div className="absolute top-3 right-3 bg-white px-3 py-1 rounded-full shadow-md flex items-center space-x-1">
-            <Link2 className="h-4 w-4 text-slate-600" />
-            <span className="text-sm font-medium text-slate-700">Multiple Formats</span>
+        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 flex items-center justify-center">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white px-4 py-2 rounded-lg shadow-lg">
+            <span className="text-slate-800 font-medium">View Details</span>
           </div>
-        )}
+        </div>
       </div>
 
       <div className="p-6">
-        <h3 className="text-xl font-bold text-slate-800 mb-2 line-clamp-2">
+        <h3 className="text-lg font-bold text-slate-800 mb-1 line-clamp-2">
           {book.title}
         </h3>
-        <p className="text-slate-600 mb-3">{book.author}</p>
-
-        {book.description && (
-          <p className="text-slate-500 text-sm mb-4 line-clamp-3">
-            {book.description}
-          </p>
-        )}
-
-        {book.publisher && (
-          <p className="text-sm text-slate-400 mb-4">
-            Publisher: {book.publisher}
-          </p>
-        )}
+        <p className="text-slate-600 text-sm mb-4">{book.author}</p>
 
         <div className="space-y-3">
           {(showAllFormats || physicalFormat) && physicalFormat && (
@@ -96,38 +74,45 @@ export default function BookCard({ book, onPurchase, onDownload, showAllFormats 
           )}
 
           {(showAllFormats || ebookFormats.length > 0) && ebookFormats.length > 0 && (
-            <div className="border-t pt-3">
+            <div className="border-t pt-3 relative">
               <div className="flex items-center space-x-2 mb-3">
                 <BookOpen className="h-5 w-5 text-green-500" />
                 <span className="font-semibold text-slate-700">Ebook - FREE</span>
               </div>
-              <div className="space-y-2">
-                {ebookFormats.map((format) => {
-                  const fileFormat = format.file_format?.toLowerCase();
-                  const isHtml = fileFormat === 'html';
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDropdown(!showDropdown);
+                }}
+                className="w-full bg-green-500 text-white py-2 rounded-lg font-medium hover:bg-green-600 transition flex items-center justify-center space-x-2"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download</span>
+                <ChevronDown className="h-4 w-4" />
+              </button>
+              {showDropdown && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg">
+                  {ebookFormats.map((format) => {
+                    const fileFormat = format.file_format?.toLowerCase();
+                    const displayName = fileFormat === 'html' ? 'Read Online' : format.file_format?.toUpperCase();
 
-                  return (
-                    <button
-                      key={format.id}
-                      onClick={() => onDownload?.(format.id, format.file_url || '', format.file_format || '')}
-                      disabled={!format.is_available}
-                      className="w-full bg-green-500 text-white py-2 rounded-lg font-medium hover:bg-green-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                    >
-                      {isHtml ? (
-                        <>
-                          <ExternalLink className="h-4 w-4" />
-                          <span>Read Online</span>
-                        </>
-                      ) : (
-                        <>
-                          <Download className="h-4 w-4" />
-                          <span>Download {format.file_format?.toUpperCase()}</span>
-                        </>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+                    return (
+                      <button
+                        key={format.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDownload?.(format.id, format.file_url || '', format.file_format || '');
+                          setShowDropdown(false);
+                        }}
+                        disabled={!format.is_available}
+                        className="w-full px-4 py-2 text-left hover:bg-slate-50 transition disabled:opacity-50 disabled:cursor-not-allowed border-b last:border-b-0 border-slate-100"
+                      >
+                        <span className="text-slate-700 font-medium">{displayName}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
@@ -137,19 +122,19 @@ export default function BookCard({ book, onPurchase, onDownload, showAllFormats 
                 <Headphones className="h-5 w-5 text-orange-500" />
                 <span className="font-semibold text-slate-700">Audiobook - FREE</span>
               </div>
-              <div className="space-y-2">
-                {audiobookFormats.map((format) => (
-                  <button
-                    key={format.id}
-                    onClick={() => onDownload?.(format.id, format.file_url || '')}
-                    disabled={!format.is_available}
-                    className="w-full bg-orange-500 text-white py-2 rounded-lg font-medium hover:bg-orange-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    <span>Download {format.file_format?.toUpperCase()}</span>
-                  </button>
-                ))}
-              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (audiobookFormats[0]) {
+                    onDownload?.(audiobookFormats[0].id, audiobookFormats[0].file_url || '', audiobookFormats[0].file_format || '');
+                  }
+                }}
+                disabled={!audiobookFormats[0]?.is_available}
+                className="w-full bg-orange-500 text-white py-2 rounded-lg font-medium hover:bg-orange-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download</span>
+              </button>
             </div>
           )}
         </div>
