@@ -182,11 +182,18 @@ function App() {
     alert('Purchase functionality would be integrated with a payment system');
   };
 
-  const handleDownload = (formatId: string, url: string) => {
-    if (url) {
+  const handleDownload = (formatId: string, url: string, fileFormat?: string) => {
+    if (!url) {
+      alert('File URL not available');
+      return;
+    }
+
+    const format = fileFormat?.toLowerCase();
+
+    if (format === 'html') {
       window.open(url, '_blank');
     } else {
-      alert('Download URL not available');
+      window.open(url, '_blank');
     }
   };
 

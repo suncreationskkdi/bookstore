@@ -7,7 +7,7 @@ interface BooksViewProps {
   books: BookWithFormats[];
   formatFilter: 'physical' | 'ebook' | 'audiobook';
   onPurchase?: (bookId: string) => void;
-  onDownload?: (formatId: string, url: string) => void;
+  onDownload?: (formatId: string, url: string, fileFormat?: string) => void;
 }
 
 export default function BooksView({ books, formatFilter, onPurchase, onDownload }: BooksViewProps) {

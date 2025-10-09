@@ -297,13 +297,26 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
 
                           <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">File Format</label>
-                            <input
-                              type="text"
-                              value={format.file_format}
-                              onChange={(e) => updateFormat(index, 'file_format', e.target.value)}
-                              placeholder="pdf, epub, mp3"
-                              className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
-                            />
+                            {format.format_type === 'ebook' ? (
+                              <select
+                                value={format.file_format}
+                                onChange={(e) => updateFormat(index, 'file_format', e.target.value)}
+                                className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+                              >
+                                <option value="">Select Format</option>
+                                <option value="pdf">PDF</option>
+                                <option value="epub">EPUB</option>
+                                <option value="html">HTML (Read Online)</option>
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                value={format.file_format}
+                                onChange={(e) => updateFormat(index, 'file_format', e.target.value)}
+                                placeholder="pdf, epub, mp3"
+                                className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+                              />
+                            )}
                           </div>
 
                           {format.format_type === 'physical' && (

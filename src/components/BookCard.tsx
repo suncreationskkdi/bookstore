@@ -1,10 +1,10 @@
-import { BookOpen, Download, ShoppingCart, Headphones, FileText, Link2 } from 'lucide-react';
+import { BookOpen, Download, ShoppingCart, Headphones, FileText, Link2, ExternalLink } from 'lucide-react';
 import { BookWithFormats } from '../lib/supabase';
 
 interface BookCardProps {
   book: BookWithFormats;
   onPurchase?: (bookId: string) => void;
-  onDownload?: (formatId: string, url: string) => void;
+  onDownload?: (formatId: string, url: string, fileFormat?: string) => void;
   showAllFormats?: boolean;
 }
 
@@ -102,17 +102,31 @@ export default function BookCard({ book, onPurchase, onDownload, showAllFormats 
                 <span className="font-semibold text-slate-700">Ebook - FREE</span>
               </div>
               <div className="space-y-2">
-                {ebookFormats.map((format) => (
-                  <button
-                    key={format.id}
-                    onClick={() => onDownload?.(format.id, format.file_url || '')}
-                    disabled={!format.is_available}
-                    className="w-full bg-green-500 text-white py-2 rounded-lg font-medium hover:bg-green-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    <span>Download {format.file_format?.toUpperCase()}</span>
-                  </button>
-                ))}
+                {ebookFormats.map((format) => {
+                  const fileFormat = format.file_format?.toLowerCase();
+                  const isHtml = fileFormat === 'html';
+
+                  return (
+                    <button
+                      key={format.id}
+                      onClick={() => onDownload?.(format.id, format.file_url || '', format.file_format || '')}
+                      disabled={!format.is_available}
+                      className="w-full bg-green-500 text-white py-2 rounded-lg font-medium hover:bg-green-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                    >
+                      {isHtml ? (
+                        <>
+                          <ExternalLink className="h-4 w-4" />
+                          <span>Read Online</span>
+                        </>
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4" />
+                          <span>Download {format.file_format?.toUpperCase()}</span>
+                        </>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
