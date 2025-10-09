@@ -80,20 +80,15 @@ export default function BookCard({ book, onPurchase, onDownload, onViewDetails, 
               <div className="flex items-center justify-center space-x-2">
                 {ebookFormats.map((format) => {
                   const fileFormat = format.file_format?.toLowerCase();
-                  let icon;
                   let label;
 
                   if (fileFormat === 'pdf') {
-                    icon = <FileText className="h-6 w-6" />;
                     label = 'PDF';
                   } else if (fileFormat === 'epub') {
-                    icon = <Download className="h-6 w-6" />;
                     label = 'EPUB';
                   } else if (fileFormat === 'html') {
-                    icon = <ExternalLink className="h-6 w-6" />;
-                    label = 'Read';
+                    label = 'Read Online';
                   } else {
-                    icon = <Download className="h-6 w-6" />;
                     label = format.file_format?.toUpperCase();
                   }
 
@@ -105,11 +100,9 @@ export default function BookCard({ book, onPurchase, onDownload, onViewDetails, 
                         onDownload?.(format.id, format.file_url || '', format.file_format || '');
                       }}
                       disabled={!format.is_available}
-                      className="flex-1 bg-green-500 text-white py-3 px-2 rounded-lg font-medium hover:bg-green-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex flex-col items-center justify-center space-y-1"
-                      title={fileFormat === 'html' ? 'Read Online' : `Download ${format.file_format?.toUpperCase()}`}
+                      className="flex-1 bg-green-500 text-white py-2 px-2 rounded-lg font-medium hover:bg-green-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed text-sm"
                     >
-                      {icon}
-                      <span className="text-xs">{label}</span>
+                      {label}
                     </button>
                   );
                 })}
