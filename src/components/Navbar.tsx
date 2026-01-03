@@ -1,4 +1,6 @@
 import { BookOpen, Headphones, ShoppingBag, User, FileText, Info, Mail } from 'lucide-react';
+import { useTranslation } from '../lib/translations';
+import LanguageSwitcher from './LanguageSwitcher';
 
 interface NavbarProps {
   currentView: 'home' | 'books' | 'ebooks' | 'audiobooks' | 'blog' | 'about' | 'contact' | 'admin';
@@ -6,6 +8,8 @@ interface NavbarProps {
 }
 
 export default function Navbar({ currentView, onViewChange }: NavbarProps) {
+  const { t } = useTranslation();
+
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -28,7 +32,7 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
               }`}
             >
               <ShoppingBag className="h-5 w-5" />
-              <span>Printed Books</span>
+              <span>{t('nav.books')}</span>
             </button>
 
             <button
@@ -40,7 +44,7 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
               }`}
             >
               <BookOpen className="h-5 w-5" />
-              <span>Ebooks</span>
+              <span>{t('nav.ebooks')}</span>
             </button>
 
             <button
@@ -52,7 +56,7 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
               }`}
             >
               <Headphones className="h-5 w-5" />
-              <span>Audiobooks</span>
+              <span>{t('nav.audiobooks')}</span>
             </button>
 
             <button
@@ -64,7 +68,7 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
               }`}
             >
               <FileText className="h-5 w-5" />
-              <span>Blog</span>
+              <span>{t('nav.blog')}</span>
             </button>
 
             <button
@@ -76,7 +80,7 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
               }`}
             >
               <Info className="h-5 w-5" />
-              <span>About</span>
+              <span>{t('nav.about')}</span>
             </button>
 
             <button
@@ -88,7 +92,7 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
               }`}
             >
               <Mail className="h-5 w-5" />
-              <span>Contact</span>
+              <span>{t('nav.contact')}</span>
             </button>
 
             <button
@@ -100,8 +104,10 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
               }`}
             >
               <User className="h-5 w-5" />
-              <span>Admin</span>
+              <span>{t('nav.admin')}</span>
             </button>
+
+            <LanguageSwitcher />
           </div>
         </div>
       </div>

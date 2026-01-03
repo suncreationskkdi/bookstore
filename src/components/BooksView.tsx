@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Filter } from 'lucide-react';
 import BookCard from './BookCard';
 import BookDetailModal from './BookDetailModal';
-import { BookWithFormats } from '../lib/supabase';
+import { BookWithFormats, supabase } from '../lib/supabase';
+import { useTranslation } from '../lib/translations';
 
 interface BooksViewProps {
   books: BookWithFormats[];
@@ -12,8 +13,23 @@ interface BooksViewProps {
 }
 
 export default function BooksView({ books, formatFilter, onPurchase, onDownload }: BooksViewProps) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBook, setSelectedBook] = useState<BookWithFormats | null>(null);
+  const [genreFilter, setGenreFilter] = useState<string>('all');
+  const [authorFilter, setAuthorFilter] = useState<string>('all');
+  const [genres, setGenres] = useState<string[]>([]);
+
+  useEffect(() => {
+    loadGenres();
+  }, []);
+
+  const loadGenres = async () => {
+    const { data } = await supabase.from('genres').select('name_en').order('name_en');
+    if (data) setGenres(data.map(g => g.name_en));
+  };
+
+  const uniqueAuthors = Array.from(new Set(books.map(b => b.author))).sort();
 
   const filteredBooks = books
     .filter(book => book.formats.some(f => f.format_type === formatFilter))
@@ -24,7 +40,9 @@ export default function BooksView({ books, formatFilter, onPurchase, onDownload 
         book.author.toLowerCase().includes(query) ||
         book.description.toLowerCase().includes(query)
       );
-    });
+    })
+    .filter(book => genreFilter === 'all' || book.genre === genreFilter)
+    .filter(book => authorFilter === 'all' || book.author === authorFilter);
 
   const getTitle = () => {
     switch (formatFilter) {
@@ -64,6 +82,45 @@ export default function BooksView({ books, formatFilter, onPurchase, onDownload 
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-slate-200 focus:border-slate-400 focus:outline-none text-lg"
             />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <div className="flex items-center space-x-3 mb-4">
+            <Filter className="h-5 w-5 text-slate-600" />
+            <h3 className="text-lg font-semibold text-slate-800">{t('common.filter')}</h3>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                {t('filter.by_genre')}
+              </label>
+              <select
+                value={genreFilter}
+                onChange={(e) => setGenreFilter(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+              >
+                <option value="all">{t('filter.all_genres')}</option>
+                {genres.map((genre) => (
+                  <option key={genre} value={genre}>{genre}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                {t('filter.by_author')}
+              </label>
+              <select
+                value={authorFilter}
+                onChange={(e) => setAuthorFilter(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+              >
+                <option value="all">{t('filter.all_authors')}</option>
+                {uniqueAuthors.map((author) => (
+                  <option key={author} value={author}>{author}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 

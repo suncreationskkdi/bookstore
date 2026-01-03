@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { Plus, Edit, Trash2, LogOut, Save, X, BookOpen, FileText, Package, Settings, Image } from 'lucide-react';
-import { BookWithFormats, BookFormat } from '../lib/supabase';
+import { useState, useEffect } from 'react';
+import { Plus, Edit, Trash2, LogOut, Save, X, BookOpen, FileText, Package, Settings, Image, Languages, Database } from 'lucide-react';
+import { BookWithFormats, BookFormat, supabase } from '../lib/supabase';
 import BlogManagement from './BlogManagement';
 import OrderManagement from './OrderManagement';
 import SiteSettingsManagement from './SiteSettingsManagement';
 import CarouselManagement from './CarouselManagement';
+import TranslationManagement from './TranslationManagement';
+import BackupRestore from './BackupRestore';
 
 interface AdminPanelProps {
   books: BookWithFormats[];
@@ -14,13 +16,15 @@ interface AdminPanelProps {
   onDeleteBook: (id: string) => void;
 }
 
-type AdminTab = 'books' | 'blogs' | 'orders' | 'carousel' | 'settings';
+type AdminTab = 'books' | 'blogs' | 'orders' | 'carousel' | 'translations' | 'backup' | 'settings';
 
 interface BookFormData {
   title: string;
   author: string;
   description: string;
   isbn: string;
+  sku: string;
+  genre: string;
   cover_image_url: string;
   publisher: string;
   published_date: string;
@@ -31,6 +35,7 @@ interface BookFormData {
     file_format: string;
     stock_quantity: string;
     is_available: boolean;
+    license_info: string;
   }>;
 }
 
@@ -38,11 +43,23 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
   const [activeTab, setActiveTab] = useState<AdminTab>('books');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [genres, setGenres] = useState<Array<{ name_en: string; name_ta: string }>>([]);
+
+  useEffect(() => {
+    loadGenres();
+  }, []);
+
+  const loadGenres = async () => {
+    const { data } = await supabase.from('genres').select('name_en, name_ta').order('name_en');
+    if (data) setGenres(data);
+  };
   const [formData, setFormData] = useState<BookFormData>({
     title: '',
     author: '',
     description: '',
     isbn: '',
+    sku: '',
+    genre: '',
     cover_image_url: '',
     publisher: '',
     published_date: '',
@@ -55,6 +72,8 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
       author: '',
       description: '',
       isbn: '',
+      sku: '',
+      genre: '',
       cover_image_url: '',
       publisher: '',
       published_date: '',
@@ -70,6 +89,8 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
       author: book.author,
       description: book.description,
       isbn: book.isbn || '',
+      sku: book.sku || '',
+      genre: book.genre || '',
       cover_image_url: book.cover_image_url,
       publisher: book.publisher,
       published_date: book.published_date || '',
@@ -79,7 +100,8 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
         file_url: f.file_url || '',
         file_format: f.file_format || '',
         stock_quantity: f.stock_quantity?.toString() || '0',
-        is_available: f.is_available
+        is_available: f.is_available,
+        license_info: f.license_info || ''
       }))
     });
     setEditingId(book.id);
@@ -94,6 +116,8 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
       author: formData.author,
       description: formData.description,
       isbn: formData.isbn,
+      sku: formData.sku || `SKU-${Date.now()}`,
+      genre: formData.genre,
       cover_image_url: formData.cover_image_url,
       publisher: formData.publisher,
       published_date: formData.published_date,
@@ -107,6 +131,7 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
         file_size: 0,
         stock_quantity: parseInt(f.stock_quantity) || 0,
         is_available: f.is_available,
+        license_info: f.license_info,
         created_at: new Date().toISOString()
       }))
     };
@@ -131,7 +156,8 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
           file_url: '',
           file_format: 'pdf',
           stock_quantity: '0',
-          is_available: true
+          is_available: true,
+          license_info: ''
         }
       ]
     });
@@ -209,6 +235,28 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
             >
               <Image className="h-5 w-5" />
               <span>Carousel</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('translations')}
+              className={`flex items-center space-x-2 px-6 py-4 font-semibold transition ${
+                activeTab === 'translations'
+                  ? 'text-slate-800 border-b-2 border-slate-800'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <Languages className="h-5 w-5" />
+              <span>Translations</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('backup')}
+              className={`flex items-center space-x-2 px-6 py-4 font-semibold transition ${
+                activeTab === 'backup'
+                  ? 'text-slate-800 border-b-2 border-slate-800'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <Database className="h-5 w-5" />
+              <span>Backup</span>
             </button>
             <button
               onClick={() => setActiveTab('settings')}
@@ -290,6 +338,31 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
                       onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
                       className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">SKU</label>
+                    <input
+                      type="text"
+                      value={formData.sku}
+                      onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+                      placeholder="Auto-generated if empty"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Genre</label>
+                    <select
+                      value={formData.genre}
+                      onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+                    >
+                      <option value="">Select a genre</option>
+                      {genres.map((g) => (
+                        <option key={g.name_en} value={g.name_en}>{g.name_en}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div>
@@ -408,16 +481,28 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
                           )}
 
                           {format.format_type !== 'physical' && (
-                            <div className="md:col-span-3">
-                              <label className="block text-sm font-medium text-slate-700 mb-2">File URL</label>
-                              <input
-                                type="url"
-                                value={format.file_url}
-                                onChange={(e) => updateFormat(index, 'file_url', e.target.value)}
-                                placeholder={format.format_type === 'audiobook' ? 'https://example.com/audio.mp3' : 'https://example.com/file.pdf'}
-                                className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
-                              />
-                            </div>
+                            <>
+                              <div className="md:col-span-3">
+                                <label className="block text-sm font-medium text-slate-700 mb-2">File URL</label>
+                                <input
+                                  type="url"
+                                  value={format.file_url}
+                                  onChange={(e) => updateFormat(index, 'file_url', e.target.value)}
+                                  placeholder={format.format_type === 'audiobook' ? 'https://example.com/audio.mp3' : 'https://example.com/file.pdf'}
+                                  className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+                                />
+                              </div>
+                              <div className="md:col-span-3">
+                                <label className="block text-sm font-medium text-slate-700 mb-2">License Info</label>
+                                <input
+                                  type="text"
+                                  value={format.license_info}
+                                  onChange={(e) => updateFormat(index, 'license_info', e.target.value)}
+                                  placeholder="e.g., CC-BY-SA, Public Domain, GPL, etc."
+                                  className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+                                />
+                              </div>
+                            </>
                           )}
 
                           <div className="flex items-center space-x-4">
@@ -514,6 +599,8 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
         {activeTab === 'blogs' && <BlogManagement />}
         {activeTab === 'orders' && <OrderManagement />}
         {activeTab === 'carousel' && <CarouselManagement />}
+        {activeTab === 'translations' && <TranslationManagement />}
+        {activeTab === 'backup' && <BackupRestore />}
         {activeTab === 'settings' && <SiteSettingsManagement />}
       </div>
     </div>

@@ -11,6 +11,8 @@ export interface Book {
   author: string;
   description: string;
   isbn?: string;
+  sku?: string;
+  genre?: string;
   cover_image_url: string;
   publisher: string;
   published_date?: string;
@@ -28,6 +30,7 @@ export interface BookFormat {
   file_size?: number;
   stock_quantity?: number;
   is_available: boolean;
+  license_info?: string;
   created_at: string;
 }
 
