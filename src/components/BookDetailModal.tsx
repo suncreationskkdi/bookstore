@@ -133,15 +133,24 @@ export default function BookDetailModal({ book, onClose, onPurchase, onDownload 
                     </div>
                     <div className="space-y-2">
                       {audiobookFormats.map((format) => (
-                        <button
-                          key={format.id}
-                          onClick={() => setPlayingAudioUrl(format.file_url || '')}
-                          disabled={!format.is_available || !format.file_url}
-                          className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                        >
-                          <Play className="h-5 w-5" />
-                          <span>Play Audio</span>
-                        </button>
+                        <div key={format.id} className="space-y-2">
+                          <button
+                            onClick={() => setPlayingAudioUrl(format.file_url || '')}
+                            disabled={!format.is_available || !format.file_url}
+                            className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                          >
+                            <Play className="h-5 w-5" />
+                            <span>Play Audio</span>
+                          </button>
+                          <button
+                            onClick={() => onDownload?.(format.id, format.file_url || '', format.file_format || '')}
+                            disabled={!format.is_available || !format.file_url}
+                            className="w-full bg-slate-600 text-white py-3 rounded-lg font-semibold hover:bg-slate-700 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                          >
+                            <Download className="h-5 w-5" />
+                            <span>Download Audio</span>
+                          </button>
+                        </div>
                       ))}
                     </div>
                   </div>
