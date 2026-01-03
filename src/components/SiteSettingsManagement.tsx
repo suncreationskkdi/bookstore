@@ -13,6 +13,12 @@ interface SiteSettings {
   whatsapp_number: string | null;
   payment_qr_code_url: string | null;
   payment_instructions: string | null;
+  facebook_url: string | null;
+  twitter_url: string | null;
+  instagram_url: string | null;
+  linkedin_url: string | null;
+  youtube_url: string | null;
+  github_url: string | null;
 }
 
 export default function SiteSettingsManagement() {
@@ -48,6 +54,12 @@ export default function SiteSettingsManagement() {
         whatsapp_number: settings.whatsapp_number,
         payment_qr_code_url: settings.payment_qr_code_url,
         payment_instructions: settings.payment_instructions,
+        facebook_url: settings.facebook_url,
+        twitter_url: settings.twitter_url,
+        instagram_url: settings.instagram_url,
+        linkedin_url: settings.linkedin_url,
+        youtube_url: settings.youtube_url,
+        github_url: settings.github_url,
         updated_at: new Date().toISOString()
       })
       .eq('id', settings.id);
@@ -196,6 +208,79 @@ export default function SiteSettingsManagement() {
               className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
               placeholder="Instructions for customers on how to make payment..."
             />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
+          <h3 className="text-xl font-bold text-slate-800 border-b pb-3">Social Media Links</h3>
+          <p className="text-sm text-slate-500">Add your social media profile URLs. These will appear in the footer.</p>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Facebook</label>
+              <input
+                type="url"
+                value={settings.facebook_url || ''}
+                onChange={(e) => setSettings({ ...settings, facebook_url: e.target.value })}
+                className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+                placeholder="https://facebook.com/your-page"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Twitter/X</label>
+              <input
+                type="url"
+                value={settings.twitter_url || ''}
+                onChange={(e) => setSettings({ ...settings, twitter_url: e.target.value })}
+                className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+                placeholder="https://twitter.com/your-handle"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Instagram</label>
+              <input
+                type="url"
+                value={settings.instagram_url || ''}
+                onChange={(e) => setSettings({ ...settings, instagram_url: e.target.value })}
+                className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+                placeholder="https://instagram.com/your-profile"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">LinkedIn</label>
+              <input
+                type="url"
+                value={settings.linkedin_url || ''}
+                onChange={(e) => setSettings({ ...settings, linkedin_url: e.target.value })}
+                className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+                placeholder="https://linkedin.com/in/your-profile"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">YouTube</label>
+              <input
+                type="url"
+                value={settings.youtube_url || ''}
+                onChange={(e) => setSettings({ ...settings, youtube_url: e.target.value })}
+                className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+                placeholder="https://youtube.com/@your-channel"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">GitHub</label>
+              <input
+                type="url"
+                value={settings.github_url || ''}
+                onChange={(e) => setSettings({ ...settings, github_url: e.target.value })}
+                className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+                placeholder="https://github.com/your-username"
+              />
+            </div>
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase, BookWithFormats } from './lib/supabase';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import LandingPage from './components/LandingPage';
 import BooksView from './components/BooksView';
 import AdminLogin from './components/AdminLogin';
@@ -219,72 +220,76 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar currentView={currentView} onViewChange={setCurrentView} />
 
-      {currentView === 'home' && (
-        <LandingPage onNavigate={setCurrentView} />
-      )}
+      <main className="flex-1">
+        {currentView === 'home' && (
+          <LandingPage onNavigate={setCurrentView} />
+        )}
 
-      {currentView === 'books' && (
-        <BooksView
-          books={books}
-          formatFilter="physical"
-          onPurchase={handlePurchase}
-          onDownload={handleDownload}
-        />
-      )}
+        {currentView === 'books' && (
+          <BooksView
+            books={books}
+            formatFilter="physical"
+            onPurchase={handlePurchase}
+            onDownload={handleDownload}
+          />
+        )}
 
-      {currentView === 'ebooks' && (
-        <BooksView
-          books={books}
-          formatFilter="ebook"
-          onPurchase={handlePurchase}
-          onDownload={handleDownload}
-        />
-      )}
+        {currentView === 'ebooks' && (
+          <BooksView
+            books={books}
+            formatFilter="ebook"
+            onPurchase={handlePurchase}
+            onDownload={handleDownload}
+          />
+        )}
 
-      {currentView === 'audiobooks' && (
-        <BooksView
-          books={books}
-          formatFilter="audiobook"
-          onPurchase={handlePurchase}
-          onDownload={handleDownload}
-        />
-      )}
+        {currentView === 'audiobooks' && (
+          <BooksView
+            books={books}
+            formatFilter="audiobook"
+            onPurchase={handlePurchase}
+            onDownload={handleDownload}
+          />
+        )}
 
-      {currentView === 'admin' && !isAdminAuthenticated && (
-        <AdminLogin onLogin={handleAdminLogin} />
-      )}
+        {currentView === 'admin' && !isAdminAuthenticated && (
+          <AdminLogin onLogin={handleAdminLogin} />
+        )}
 
-      {currentView === 'admin' && isAdminAuthenticated && (
-        <AdminPanel
-          books={books}
-          onLogout={handleAdminLogout}
-          onAddBook={handleAddBook}
-          onUpdateBook={handleUpdateBook}
-          onDeleteBook={handleDeleteBook}
-        />
-      )}
+        {currentView === 'admin' && isAdminAuthenticated && (
+          <AdminPanel
+            books={books}
+            onLogout={handleAdminLogout}
+            onAddBook={handleAddBook}
+            onUpdateBook={handleUpdateBook}
+            onDeleteBook={handleDeleteBook}
+          />
+        )}
 
-      {currentView === 'blog' && !selectedBlogId && (
-        <BlogList onSelectBlog={setSelectedBlogId} />
-      )}
+        {currentView === 'blog' && !selectedBlogId && (
+          <BlogList onSelectBlog={setSelectedBlogId} />
+        )}
 
-      {currentView === 'blog' && selectedBlogId && (
-        <BlogDetail blogId={selectedBlogId} onBack={() => setSelectedBlogId(null)} />
-      )}
+        {currentView === 'blog' && selectedBlogId && (
+          <BlogDetail blogId={selectedBlogId} onBack={() => setSelectedBlogId(null)} />
+        )}
 
-      {currentView === 'about' && <AboutPage />}
+        {currentView === 'about' && <AboutPage />}
 
-      {currentView === 'contact' && <ContactPage />}
+        {currentView === 'contact' && <ContactPage />}
 
-      {checkoutBook && (
-        <CheckoutFlow
-          book={checkoutBook}
-          onClose={() => setCheckoutBook(null)}
-        />
-      )}
+        {checkoutBook && (
+          <CheckoutFlow
+            book={checkoutBook}
+            onClose={() => setCheckoutBook(null)}
+          />
+        )}
+      </main>
+
+      <Footer />
     </div>
   );
 }
