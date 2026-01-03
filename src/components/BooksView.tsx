@@ -13,7 +13,7 @@ interface BooksViewProps {
 }
 
 export default function BooksView({ books, formatFilter, onPurchase, onDownload }: BooksViewProps) {
-  const { t } = useTranslation();
+  const { t, translateGenre } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBook, setSelectedBook] = useState<BookWithFormats | null>(null);
   const [genreFilter, setGenreFilter] = useState<string>('all');
@@ -102,7 +102,7 @@ export default function BooksView({ books, formatFilter, onPurchase, onDownload 
               >
                 <option value="all">{t('filter.all_genres')}</option>
                 {genres.map((genre) => (
-                  <option key={genre} value={genre}>{genre}</option>
+                  <option key={genre} value={genre}>{translateGenre(genre)}</option>
                 ))}
               </select>
             </div>

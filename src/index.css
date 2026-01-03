@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body[lang="ta"], body[lang="ta"] * {
+    font-family: 'Noto Sans Tamil', sans-serif;
+  }
+}
+
 @layer utilities {
   .animate-fade-in {
     animation: fadeIn 1s ease-in forwards;

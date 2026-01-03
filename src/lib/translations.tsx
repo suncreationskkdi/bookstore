@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from './supabase';
+import { loadGenres, translateGenre as translateGenreFn } from './genreTranslations';
 
 type Language = 'en' | 'ta';
 
@@ -14,6 +15,7 @@ interface TranslationContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  translateGenre: (genreName: string) => string;
   translations: Translation[];
   loadTranslations: () => Promise<void>;
 }
@@ -29,7 +31,13 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     loadTranslations();
+    loadGenres();
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.body.lang = language;
+  }, [language]);
 
   const loadTranslations = async () => {
     const { data } = await supabase
@@ -55,8 +63,12 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
     return language === 'en' ? translation.english : translation.tamil;
   };
 
+  const translateGenre = (genreName: string): string => {
+    return translateGenreFn(genreName, language);
+  };
+
   return (
-    <TranslationContext.Provider value={{ language, setLanguage, t, translations, loadTranslations }}>
+    <TranslationContext.Provider value={{ language, setLanguage, t, translateGenre, translations, loadTranslations }}>
       {children}
     </TranslationContext.Provider>
   );
