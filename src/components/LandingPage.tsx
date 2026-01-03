@@ -1,4 +1,5 @@
 import { BookOpen, Headphones, ShoppingBag, Download, DollarSign } from 'lucide-react';
+import HeroCarousel from './HeroCarousel';
 
 interface LandingPageProps {
   onNavigate: (view: 'books' | 'ebooks' | 'audiobooks') => void;
@@ -7,10 +8,12 @@ interface LandingPageProps {
 export default function LandingPage({ onNavigate }: LandingPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <HeroCarousel />
+
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
           <h1 className="text-6xl font-bold text-slate-800 mb-6">
-            Welcome to BookHub
+            Discover Our Collection
           </h1>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto">
             Your one-stop destination for printed books, free ebooks, and audiobooks.

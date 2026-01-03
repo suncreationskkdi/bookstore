@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Plus, Edit, Trash2, LogOut, Save, X, BookOpen, FileText, Package, Settings } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Save, X, BookOpen, FileText, Package, Settings, Image } from 'lucide-react';
 import { BookWithFormats, BookFormat } from '../lib/supabase';
 import BlogManagement from './BlogManagement';
 import OrderManagement from './OrderManagement';
 import SiteSettingsManagement from './SiteSettingsManagement';
+import CarouselManagement from './CarouselManagement';
 
 interface AdminPanelProps {
   books: BookWithFormats[];
@@ -13,7 +14,7 @@ interface AdminPanelProps {
   onDeleteBook: (id: string) => void;
 }
 
-type AdminTab = 'books' | 'blogs' | 'orders' | 'settings';
+type AdminTab = 'books' | 'blogs' | 'orders' | 'carousel' | 'settings';
 
 interface BookFormData {
   title: string;
@@ -197,6 +198,17 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
             >
               <Package className="h-5 w-5" />
               <span>Orders</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('carousel')}
+              className={`flex items-center space-x-2 px-6 py-4 font-semibold transition ${
+                activeTab === 'carousel'
+                  ? 'text-slate-800 border-b-2 border-slate-800'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <Image className="h-5 w-5" />
+              <span>Carousel</span>
             </button>
             <button
               onClick={() => setActiveTab('settings')}
@@ -501,6 +513,7 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
 
         {activeTab === 'blogs' && <BlogManagement />}
         {activeTab === 'orders' && <OrderManagement />}
+        {activeTab === 'carousel' && <CarouselManagement />}
         {activeTab === 'settings' && <SiteSettingsManagement />}
       </div>
     </div>
