@@ -1,6 +1,7 @@
 import { BookOpen, Headphones, ShoppingBag, User, FileText, Info, Mail } from 'lucide-react';
 import { useTranslation } from '../lib/translations';
 import LanguageSwitcher from './LanguageSwitcher';
+import FontSizeSwitcher from './FontSizeSwitcher';
 
 interface NavbarProps {
   currentView: 'home' | 'books' | 'ebooks' | 'audiobooks' | 'blog' | 'about' | 'contact' | 'admin';
@@ -107,6 +108,7 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
               <span>{t('nav.admin')}</span>
             </button>
 
+            <FontSizeSwitcher />
             <LanguageSwitcher />
           </div>
         </div>
