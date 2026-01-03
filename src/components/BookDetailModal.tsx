@@ -1,5 +1,7 @@
-import { X, Download, ShoppingCart, BookOpen, Headphones } from 'lucide-react';
+import { useState } from 'react';
+import { X, Download, ShoppingCart, BookOpen, Headphones, Play } from 'lucide-react';
 import { BookWithFormats } from '../lib/supabase';
+import AudiobookPlayer from './AudiobookPlayer';
 
 interface BookDetailModalProps {
   book: BookWithFormats;
@@ -9,6 +11,7 @@ interface BookDetailModalProps {
 }
 
 export default function BookDetailModal({ book, onClose, onPurchase, onDownload }: BookDetailModalProps) {
+  const [playingAudioUrl, setPlayingAudioUrl] = useState<string | null>(null);
   const physicalFormat = book.formats.find(f => f.format_type === 'physical');
   const ebookFormats = book.formats.filter(f => f.format_type === 'ebook');
   const audiobookFormats = book.formats.filter(f => f.format_type === 'audiobook');
@@ -132,14 +135,31 @@ export default function BookDetailModal({ book, onClose, onPurchase, onDownload 
                       {audiobookFormats.map((format) => (
                         <button
                           key={format.id}
-                          onClick={() => onDownload?.(format.id, format.file_url || '', format.file_format || '')}
-                          disabled={!format.is_available}
+                          onClick={() => setPlayingAudioUrl(format.file_url || '')}
+                          disabled={!format.is_available || !format.file_url}
                           className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                         >
-                          <Download className="h-5 w-5" />
-                          <span>Download {format.file_format?.toUpperCase()}</span>
+                          <Play className="h-5 w-5" />
+                          <span>Play Audio</span>
                         </button>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {playingAudioUrl && (
+                  <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60] p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xl font-bold text-slate-800">Now Playing</h2>
+                        <button
+                          onClick={() => setPlayingAudioUrl(null)}
+                          className="bg-slate-100 rounded-full p-2 hover:bg-slate-200 transition"
+                        >
+                          <X className="h-6 w-6 text-slate-700" />
+                        </button>
+                      </div>
+                      <AudiobookPlayer url={playingAudioUrl} title={book.title} />
                     </div>
                   </div>
                 )}

@@ -58,9 +58,8 @@ export default function AudiobookPlayer({ url, title }: AudiobookPlayerProps) {
   };
 
   return (
-    <div className="bg-slate-100 rounded-lg p-6">
-      <h3 className="text-lg font-semibold text-slate-800 mb-4">Audio Player</h3>
-      <p className="text-sm text-slate-600 mb-4">{title}</p>
+    <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg p-6">
+      <p className="text-base text-slate-700 mb-6 font-medium">{title}</p>
 
       <audio
         ref={audioRef}
@@ -77,25 +76,25 @@ export default function AudiobookPlayer({ url, title }: AudiobookPlayerProps) {
           max={duration || 0}
           value={currentTime}
           onChange={handleSeek}
-          className="w-full h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer"
+          className="w-full h-2 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-orange-500"
         />
 
-        <div className="flex items-center justify-between text-sm text-slate-600">
+        <div className="flex items-center justify-between text-sm text-slate-600 font-medium">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>
 
-        <div className="flex items-center justify-center space-x-4">
+        <div className="flex items-center justify-center space-x-6 pt-2">
           <button
             onClick={togglePlay}
-            className="bg-blue-500 text-white p-4 rounded-full hover:bg-blue-600 transition"
+            className="bg-orange-500 text-white p-5 rounded-full hover:bg-orange-600 transition shadow-lg transform hover:scale-105"
           >
-            {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-1" />}
+            {isPlaying ? <Pause className="h-7 w-7" /> : <Play className="h-7 w-7 ml-1" />}
           </button>
 
           <button
             onClick={toggleMute}
-            className="text-slate-600 hover:text-slate-800 transition"
+            className="text-slate-600 hover:text-slate-800 transition p-3 rounded-full hover:bg-slate-200"
           >
             {isMuted ? <VolumeX className="h-6 w-6" /> : <Volume2 className="h-6 w-6" />}
           </button>
