@@ -1,4 +1,5 @@
-import { BookOpen, Headphones, ShoppingBag, User, FileText, Info, Mail } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { BookOpen, Headphones, ShoppingBag, User, FileText, Info, Mail, Settings } from 'lucide-react';
 import { useTranslation } from '../lib/translations';
 import LanguageSwitcher from './LanguageSwitcher';
 import FontSizeSwitcher from './FontSizeSwitcher';
@@ -10,6 +11,19 @@ interface NavbarProps {
 
 export default function Navbar({ currentView, onViewChange }: NavbarProps) {
   const { t } = useTranslation();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+        setSettingsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -108,8 +122,33 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
               <span>{t('nav.admin')}</span>
             </button>
 
-            <FontSizeSwitcher />
-            <LanguageSwitcher />
+            <div ref={settingsRef} className="relative">
+              <button
+                onClick={() => setSettingsOpen(!settingsOpen)}
+                className="flex items-center justify-center p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition"
+                aria-label="Settings"
+              >
+                <Settings className="h-6 w-6" />
+              </button>
+
+              {settingsOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-50">
+                  <div className="px-4 py-2 border-b border-slate-200">
+                    <p className="text-sm font-semibold text-slate-700">Settings</p>
+                  </div>
+
+                  <div className="px-4 py-3 border-b border-slate-200">
+                    <p className="text-xs font-medium text-slate-500 mb-2">Language</p>
+                    <LanguageSwitcher />
+                  </div>
+
+                  <div className="px-4 py-3">
+                    <p className="text-xs font-medium text-slate-500 mb-2">Font Size</p>
+                    <FontSizeSwitcher />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
