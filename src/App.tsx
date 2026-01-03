@@ -8,11 +8,11 @@ import AdminLogin from './components/AdminLogin';
 import AdminPanel from './components/AdminPanel';
 import BlogList from './components/BlogList';
 import BlogDetail from './components/BlogDetail';
-import AboutPage from './components/AboutPage';
 import ContactPage from './components/ContactPage';
 import CheckoutFlow from './components/CheckoutFlow';
+import ContentPage from './components/ContentPage';
 
-type View = 'home' | 'books' | 'ebooks' | 'audiobooks' | 'blog' | 'about' | 'contact' | 'admin';
+type View = 'home' | 'books' | 'ebooks' | 'audiobooks' | 'contribute' | 'blog' | 'about' | 'contact' | 'admin';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('home');
@@ -277,7 +277,9 @@ function App() {
           <BlogDetail blogId={selectedBlogId} onBack={() => setSelectedBlogId(null)} />
         )}
 
-        {currentView === 'about' && <AboutPage />}
+        {currentView === 'contribute' && <ContentPage pageKey="contribute" />}
+
+        {currentView === 'about' && <ContentPage pageKey="about" />}
 
         {currentView === 'contact' && <ContactPage />}
 

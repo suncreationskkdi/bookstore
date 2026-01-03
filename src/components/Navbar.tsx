@@ -1,18 +1,27 @@
 import { useState, useRef, useEffect } from 'react';
-import { BookOpen, Headphones, ShoppingBag, User, FileText, Info, Mail, Settings, Menu, X } from 'lucide-react';
+import { BookOpen, Headphones, ShoppingBag, User, FileText, Info, Mail, Settings, Menu, X, Heart } from 'lucide-react';
 import { useTranslation } from '../lib/translations';
 import LanguageSwitcher from './LanguageSwitcher';
 import FontSizeSwitcher from './FontSizeSwitcher';
+import { supabase } from '../lib/supabase';
 
 interface NavbarProps {
-  currentView: 'home' | 'books' | 'ebooks' | 'audiobooks' | 'blog' | 'about' | 'contact' | 'admin';
-  onViewChange: (view: 'home' | 'books' | 'ebooks' | 'audiobooks' | 'blog' | 'about' | 'contact' | 'admin') => void;
+  currentView: 'home' | 'books' | 'ebooks' | 'audiobooks' | 'contribute' | 'blog' | 'about' | 'contact' | 'admin';
+  onViewChange: (view: 'home' | 'books' | 'ebooks' | 'audiobooks' | 'contribute' | 'blog' | 'about' | 'contact' | 'admin') => void;
+}
+
+interface MenuSetting {
+  menu_key: string;
+  menu_label: string;
+  is_enabled: boolean;
+  order_index: number;
 }
 
 export default function Navbar({ currentView, onViewChange }: NavbarProps) {
   const { t } = useTranslation();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [menus, setMenus] = useState<MenuSetting[]>([]);
   const settingsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,9 +35,46 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleNavClick = (view: 'home' | 'books' | 'ebooks' | 'audiobooks' | 'blog' | 'about' | 'contact' | 'admin') => {
+  useEffect(() => {
+    loadMenus();
+  }, []);
+
+  const loadMenus = async () => {
+    const { data } = await supabase
+      .from('menu_settings')
+      .select('*')
+      .eq('is_enabled', true)
+      .order('order_index');
+
+    if (data) setMenus(data);
+  };
+
+  const handleNavClick = (view: 'home' | 'books' | 'ebooks' | 'audiobooks' | 'contribute' | 'blog' | 'about' | 'contact' | 'admin') => {
     onViewChange(view);
     setMobileMenuOpen(false);
+  };
+
+  const getMenuIcon = (menuKey: string, className: string) => {
+    switch (menuKey) {
+      case 'books':
+        return <ShoppingBag className={className} />;
+      case 'ebooks':
+        return <BookOpen className={className} />;
+      case 'audiobooks':
+        return <Headphones className={className} />;
+      case 'contribute':
+        return <Heart className={className} />;
+      case 'blog':
+        return <FileText className={className} />;
+      case 'about':
+        return <Info className={className} />;
+      case 'contact':
+        return <Mail className={className} />;
+      case 'admin':
+        return <User className={className} />;
+      default:
+        return <FileText className={className} />;
+    }
   };
 
   return (
@@ -44,89 +90,20 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
           </button>
 
           <div className="hidden lg:flex items-center space-x-4 xl:space-x-6">
-            <button
-              onClick={() => onViewChange('books')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition text-sm xl:text-base ${
-                currentView === 'books'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <ShoppingBag className="h-4 w-4 xl:h-5 xl:w-5" />
-              <span>{t('nav.books')}</span>
-            </button>
-
-            <button
-              onClick={() => onViewChange('ebooks')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition text-sm xl:text-base ${
-                currentView === 'ebooks'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <BookOpen className="h-4 w-4 xl:h-5 xl:w-5" />
-              <span>{t('nav.ebooks')}</span>
-            </button>
-
-            <button
-              onClick={() => onViewChange('audiobooks')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition text-sm xl:text-base ${
-                currentView === 'audiobooks'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <Headphones className="h-4 w-4 xl:h-5 xl:w-5" />
-              <span>{t('nav.audiobooks')}</span>
-            </button>
-
-            <button
-              onClick={() => onViewChange('blog')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition text-sm xl:text-base ${
-                currentView === 'blog'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <FileText className="h-4 w-4 xl:h-5 xl:w-5" />
-              <span>{t('nav.blog')}</span>
-            </button>
-
-            <button
-              onClick={() => onViewChange('about')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition text-sm xl:text-base ${
-                currentView === 'about'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <Info className="h-4 w-4 xl:h-5 xl:w-5" />
-              <span>{t('nav.about')}</span>
-            </button>
-
-            <button
-              onClick={() => onViewChange('contact')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition text-sm xl:text-base ${
-                currentView === 'contact'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <Mail className="h-4 w-4 xl:h-5 xl:w-5" />
-              <span>{t('nav.contact')}</span>
-            </button>
-
-            <button
-              onClick={() => onViewChange('admin')}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition text-sm xl:text-base ${
-                currentView === 'admin'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <User className="h-4 w-4 xl:h-5 xl:w-5" />
-              <span>{t('nav.admin')}</span>
-            </button>
+            {menus.map((menu) => (
+              <button
+                key={menu.menu_key}
+                onClick={() => onViewChange(menu.menu_key as any)}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition text-sm xl:text-base ${
+                  currentView === menu.menu_key
+                    ? 'bg-slate-800 text-white'
+                    : 'text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                {getMenuIcon(menu.menu_key, 'h-4 w-4 xl:h-5 xl:w-5')}
+                <span>{menu.menu_label}</span>
+              </button>
+            ))}
 
             <div ref={settingsRef} className="relative">
               <button
@@ -198,89 +175,20 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
 
         {mobileMenuOpen && (
           <div className="lg:hidden border-t border-slate-200 py-4 space-y-2">
-            <button
-              onClick={() => handleNavClick('books')}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition ${
-                currentView === 'books'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <ShoppingBag className="h-5 w-5" />
-              <span>{t('nav.books')}</span>
-            </button>
-
-            <button
-              onClick={() => handleNavClick('ebooks')}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition ${
-                currentView === 'ebooks'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <BookOpen className="h-5 w-5" />
-              <span>{t('nav.ebooks')}</span>
-            </button>
-
-            <button
-              onClick={() => handleNavClick('audiobooks')}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition ${
-                currentView === 'audiobooks'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <Headphones className="h-5 w-5" />
-              <span>{t('nav.audiobooks')}</span>
-            </button>
-
-            <button
-              onClick={() => handleNavClick('blog')}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition ${
-                currentView === 'blog'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <FileText className="h-5 w-5" />
-              <span>{t('nav.blog')}</span>
-            </button>
-
-            <button
-              onClick={() => handleNavClick('about')}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition ${
-                currentView === 'about'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <Info className="h-5 w-5" />
-              <span>{t('nav.about')}</span>
-            </button>
-
-            <button
-              onClick={() => handleNavClick('contact')}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition ${
-                currentView === 'contact'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <Mail className="h-5 w-5" />
-              <span>{t('nav.contact')}</span>
-            </button>
-
-            <button
-              onClick={() => handleNavClick('admin')}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition ${
-                currentView === 'admin'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <User className="h-5 w-5" />
-              <span>{t('nav.admin')}</span>
-            </button>
+            {menus.map((menu) => (
+              <button
+                key={menu.menu_key}
+                onClick={() => handleNavClick(menu.menu_key as any)}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition ${
+                  currentView === menu.menu_key
+                    ? 'bg-slate-800 text-white'
+                    : 'text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                {getMenuIcon(menu.menu_key, 'h-5 w-5')}
+                <span>{menu.menu_label}</span>
+              </button>
+            ))}
           </div>
         )}
       </div>
