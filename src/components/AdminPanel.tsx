@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, LogOut, Save, X, BookOpen, FileText, Package, Settings, Image, Languages, Database } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Save, X, BookOpen, FileText, Package, Settings, Image, Languages, Database, Music } from 'lucide-react';
 import { BookWithFormats, BookFormat, supabase } from '../lib/supabase';
 import BlogManagement from './BlogManagement';
 import OrderManagement from './OrderManagement';
@@ -7,6 +7,7 @@ import SiteSettingsManagement from './SiteSettingsManagement';
 import CarouselManagement from './CarouselManagement';
 import TranslationManagement from './TranslationManagement';
 import BackupRestore from './BackupRestore';
+import ChapterManagement from './ChapterManagement';
 
 interface AdminPanelProps {
   books: BookWithFormats[];
@@ -44,6 +45,7 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [genres, setGenres] = useState<Array<{ name_en: string; name_ta: string }>>([]);
+  const [managingChaptersFormatId, setManagingChaptersFormatId] = useState<string | null>(null);
 
   useEffect(() => {
     loadGenres();
@@ -411,8 +413,26 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
                   </div>
 
                   <div className="space-y-4">
-                    {formData.formats.map((format, index) => (
+                    {formData.formats.map((format, index) => {
+                      const editingBook = editingId ? books.find(b => b.id === editingId) : null;
+                      const existingFormat = editingBook?.formats[index];
+                      const canManageChapters = format.format_type === 'audiobook' && existingFormat?.id;
+
+                      return (
                       <div key={index} className="bg-slate-50 p-4 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-semibold text-slate-700">Format #{index + 1}</h4>
+                          {canManageChapters && (
+                            <button
+                              type="button"
+                              onClick={() => setManagingChaptersFormatId(existingFormat.id)}
+                              className="bg-orange-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-orange-600 transition flex items-center space-x-1"
+                            >
+                              <Music className="h-4 w-4" />
+                              <span>Manage Chapters</span>
+                            </button>
+                          )}
+                        </div>
                         <div className="grid md:grid-cols-4 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">Type</label>
@@ -525,7 +545,8 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
                           </div>
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
                 </div>
 
@@ -603,6 +624,13 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
         {activeTab === 'backup' && <BackupRestore />}
         {activeTab === 'settings' && <SiteSettingsManagement />}
       </div>
+
+      {managingChaptersFormatId && (
+        <ChapterManagement
+          formatId={managingChaptersFormatId}
+          onClose={() => setManagingChaptersFormatId(null)}
+        />
+      )}
     </div>
   );
 }

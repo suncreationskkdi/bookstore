@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { X, Download, ShoppingCart, BookOpen, Headphones, Play } from 'lucide-react';
-import { BookWithFormats } from '../lib/supabase';
+import { useState, useEffect } from 'react';
+import { X, Download, ShoppingCart, BookOpen, Headphones, Play, ChevronDown, ChevronUp } from 'lucide-react';
+import { BookWithFormats, supabase } from '../lib/supabase';
 import AudiobookPlayer from './AudiobookPlayer';
 
 interface BookDetailModalProps {
@@ -10,11 +10,57 @@ interface BookDetailModalProps {
   onDownload?: (formatId: string, url: string, fileFormat?: string) => void;
 }
 
+interface AudioChapter {
+  id: string;
+  chapter_number: number;
+  chapter_title: string;
+  file_url: string;
+  duration_minutes?: number;
+}
+
 export default function BookDetailModal({ book, onClose, onPurchase, onDownload }: BookDetailModalProps) {
   const [playingAudioUrl, setPlayingAudioUrl] = useState<string | null>(null);
+  const [playingChapterTitle, setPlayingChapterTitle] = useState<string | null>(null);
+  const [chapters, setChapters] = useState<Record<string, AudioChapter[]>>({});
+  const [expandedFormats, setExpandedFormats] = useState<Record<string, boolean>>({});
   const physicalFormat = book.formats.find(f => f.format_type === 'physical');
   const ebookFormats = book.formats.filter(f => f.format_type === 'ebook');
   const audiobookFormats = book.formats.filter(f => f.format_type === 'audiobook');
+
+  useEffect(() => {
+    const fetchChapters = async () => {
+      const formatIds = audiobookFormats.map(f => f.id);
+      if (formatIds.length === 0) return;
+
+      const { data, error } = await supabase
+        .from('audiobook_chapters')
+        .select('*')
+        .in('book_format_id', formatIds)
+        .order('chapter_number', { ascending: true });
+
+      if (!error && data) {
+        const chaptersByFormat: Record<string, AudioChapter[]> = {};
+        data.forEach((chapter: any) => {
+          if (!chaptersByFormat[chapter.book_format_id]) {
+            chaptersByFormat[chapter.book_format_id] = [];
+          }
+          chaptersByFormat[chapter.book_format_id].push(chapter);
+        });
+        setChapters(chaptersByFormat);
+      }
+    };
+
+    fetchChapters();
+  }, [audiobookFormats]);
+
+  const toggleFormatExpanded = (formatId: string) => {
+    setExpandedFormats(prev => ({ ...prev, [formatId]: !prev[formatId] }));
+  };
+
+  const playAudio = (url: string, title?: string) => {
+    setPlayingAudioUrl(url);
+    setPlayingChapterTitle(title || null);
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -131,27 +177,85 @@ export default function BookDetailModal({ book, onClose, onPurchase, onDownload 
                       <Headphones className="h-6 w-6 text-orange-500" />
                       <span className="text-lg font-semibold text-slate-700">Audiobook - FREE</span>
                     </div>
-                    <div className="space-y-2">
-                      {audiobookFormats.map((format) => (
-                        <div key={format.id} className="space-y-2">
-                          <button
-                            onClick={() => setPlayingAudioUrl(format.file_url || '')}
-                            disabled={!format.is_available || !format.file_url}
-                            className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                          >
-                            <Play className="h-5 w-5" />
-                            <span>Play Audio</span>
-                          </button>
-                          <button
-                            onClick={() => onDownload?.(format.id, format.file_url || '', format.file_format || '')}
-                            disabled={!format.is_available || !format.file_url}
-                            className="w-full bg-slate-600 text-white py-3 rounded-lg font-semibold hover:bg-slate-700 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                          >
-                            <Download className="h-5 w-5" />
-                            <span>Download Audio</span>
-                          </button>
-                        </div>
-                      ))}
+                    <div className="space-y-4">
+                      {audiobookFormats.map((format) => {
+                        const formatChapters = chapters[format.id] || [];
+                        const hasChapters = formatChapters.length > 0;
+                        const isExpanded = expandedFormats[format.id];
+
+                        return (
+                          <div key={format.id} className="space-y-2">
+                            {hasChapters ? (
+                              <>
+                                <button
+                                  onClick={() => toggleFormatExpanded(format.id)}
+                                  className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition flex items-center justify-between px-4"
+                                >
+                                  <span className="flex items-center space-x-2">
+                                    <Headphones className="h-5 w-5" />
+                                    <span>{formatChapters.length} Chapters Available</span>
+                                  </span>
+                                  {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                                </button>
+
+                                {isExpanded && (
+                                  <div className="space-y-2 pl-4 border-l-2 border-orange-200">
+                                    {formatChapters.map((chapter) => (
+                                      <div key={chapter.id} className="bg-slate-50 rounded-lg p-3">
+                                        <div className="flex items-start justify-between mb-2">
+                                          <div>
+                                            <p className="font-medium text-slate-800">
+                                              Chapter {chapter.chapter_number}: {chapter.chapter_title}
+                                            </p>
+                                            {chapter.duration_minutes && (
+                                              <p className="text-sm text-slate-500">{chapter.duration_minutes} min</p>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <div className="flex space-x-2">
+                                          <button
+                                            onClick={() => playAudio(chapter.file_url, `Chapter ${chapter.chapter_number}: ${chapter.chapter_title}`)}
+                                            className="flex-1 bg-orange-500 text-white py-2 rounded-lg font-medium hover:bg-orange-600 transition flex items-center justify-center space-x-1 text-sm"
+                                          >
+                                            <Play className="h-4 w-4" />
+                                            <span>Play</span>
+                                          </button>
+                                          <button
+                                            onClick={() => window.open(chapter.file_url, '_blank')}
+                                            className="flex-1 bg-slate-600 text-white py-2 rounded-lg font-medium hover:bg-slate-700 transition flex items-center justify-center space-x-1 text-sm"
+                                          >
+                                            <Download className="h-4 w-4" />
+                                            <span>Download</span>
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => playAudio(format.file_url || '', book.title)}
+                                  disabled={!format.is_available || !format.file_url}
+                                  className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                                >
+                                  <Play className="h-5 w-5" />
+                                  <span>Play Audio</span>
+                                </button>
+                                <button
+                                  onClick={() => onDownload?.(format.id, format.file_url || '', format.file_format || '')}
+                                  disabled={!format.is_available || !format.file_url}
+                                  className="w-full bg-slate-600 text-white py-3 rounded-lg font-semibold hover:bg-slate-700 transition disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                                >
+                                  <Download className="h-5 w-5" />
+                                  <span>Download Audio</span>
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -160,15 +264,20 @@ export default function BookDetailModal({ book, onClose, onPurchase, onDownload 
                   <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60] p-4">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6">
                       <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold text-slate-800">Now Playing</h2>
+                        <h2 className="text-xl font-bold text-slate-800">
+                          {playingChapterTitle || 'Now Playing'}
+                        </h2>
                         <button
-                          onClick={() => setPlayingAudioUrl(null)}
+                          onClick={() => {
+                            setPlayingAudioUrl(null);
+                            setPlayingChapterTitle(null);
+                          }}
                           className="bg-slate-100 rounded-full p-2 hover:bg-slate-200 transition"
                         >
                           <X className="h-6 w-6 text-slate-700" />
                         </button>
                       </div>
-                      <AudiobookPlayer url={playingAudioUrl} title={book.title} />
+                      <AudiobookPlayer url={playingAudioUrl} title={playingChapterTitle || book.title} />
                     </div>
                   </div>
                 )}
