@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { Plus, Edit, Trash2, LogOut, Save, X } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Save, X, BookOpen, FileText, Package, Settings } from 'lucide-react';
 import { BookWithFormats, BookFormat } from '../lib/supabase';
+import BlogManagement from './BlogManagement';
+import OrderManagement from './OrderManagement';
+import SiteSettingsManagement from './SiteSettingsManagement';
 
 interface AdminPanelProps {
   books: BookWithFormats[];
@@ -9,6 +12,8 @@ interface AdminPanelProps {
   onUpdateBook: (id: string, book: Partial<BookWithFormats>) => void;
   onDeleteBook: (id: string) => void;
 }
+
+type AdminTab = 'books' | 'blogs' | 'orders' | 'settings';
 
 interface BookFormData {
   title: string;
@@ -29,6 +34,7 @@ interface BookFormData {
 }
 
 export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, onDeleteBook }: AdminPanelProps) {
+  const [activeTab, setActiveTab] = useState<AdminTab>('books');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<BookFormData>({
@@ -148,35 +154,87 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold text-slate-800">Admin Panel</h1>
-          <div className="flex space-x-4">
+          <button
+            onClick={onLogout}
+            className="bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition flex items-center space-x-2"
+          >
+            <LogOut className="h-5 w-5" />
+            <span>Logout</span>
+          </button>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-lg mb-8">
+          <div className="flex border-b">
             <button
-              onClick={() => setShowForm(true)}
-              className="bg-slate-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-700 transition flex items-center space-x-2"
+              onClick={() => setActiveTab('books')}
+              className={`flex items-center space-x-2 px-6 py-4 font-semibold transition ${
+                activeTab === 'books'
+                  ? 'text-slate-800 border-b-2 border-slate-800'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
             >
-              <Plus className="h-5 w-5" />
-              <span>Add Book</span>
+              <BookOpen className="h-5 w-5" />
+              <span>Books</span>
             </button>
             <button
-              onClick={onLogout}
-              className="bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition flex items-center space-x-2"
+              onClick={() => setActiveTab('blogs')}
+              className={`flex items-center space-x-2 px-6 py-4 font-semibold transition ${
+                activeTab === 'blogs'
+                  ? 'text-slate-800 border-b-2 border-slate-800'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
             >
-              <LogOut className="h-5 w-5" />
-              <span>Logout</span>
+              <FileText className="h-5 w-5" />
+              <span>Blogs</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`flex items-center space-x-2 px-6 py-4 font-semibold transition ${
+                activeTab === 'orders'
+                  ? 'text-slate-800 border-b-2 border-slate-800'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <Package className="h-5 w-5" />
+              <span>Orders</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`flex items-center space-x-2 px-6 py-4 font-semibold transition ${
+                activeTab === 'settings'
+                  ? 'text-slate-800 border-b-2 border-slate-800'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <Settings className="h-5 w-5" />
+              <span>Settings</span>
             </button>
           </div>
         </div>
 
-        {showForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8">
-              <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-slate-800">
-                  {editingId ? 'Edit Book' : 'Add New Book'}
-                </h2>
-                <button onClick={resetForm} className="text-slate-400 hover:text-slate-600">
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
+        {activeTab === 'books' && (
+          <>
+            <div className="flex justify-end mb-6">
+              <button
+                onClick={() => setShowForm(true)}
+                className="bg-slate-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-700 transition flex items-center space-x-2"
+              >
+                <Plus className="h-5 w-5" />
+                <span>Add Book</span>
+              </button>
+            </div>
+
+            {showForm && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+                <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8">
+                  <div className="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-slate-800">
+                      {editingId ? 'Edit Book' : 'Add New Book'}
+                    </h2>
+                    <button onClick={resetForm} className="text-slate-400 hover:text-slate-600">
+                      <X className="h-6 w-6" />
+                    </button>
+                  </div>
 
               <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
                 <div className="grid md:grid-cols-2 gap-6">
@@ -308,13 +366,19 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
                                 <option value="epub">EPUB</option>
                                 <option value="html">HTML (Read Online)</option>
                               </select>
+                            ) : format.format_type === 'audiobook' ? (
+                              <input
+                                type="text"
+                                value="mp3"
+                                disabled
+                                className="w-full px-4 py-2 rounded-lg border border-slate-300 bg-slate-100 text-slate-500"
+                              />
                             ) : (
                               <input
                                 type="text"
-                                value={format.file_format}
-                                onChange={(e) => updateFormat(index, 'file_format', e.target.value)}
-                                placeholder="pdf, epub, mp3"
-                                className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+                                value="N/A"
+                                disabled
+                                className="w-full px-4 py-2 rounded-lg border border-slate-300 bg-slate-100 text-slate-500"
                               />
                             )}
                           </div>
@@ -331,16 +395,18 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
                             </div>
                           )}
 
-                          <div className="md:col-span-3">
-                            <label className="block text-sm font-medium text-slate-700 mb-2">File URL</label>
-                            <input
-                              type="url"
-                              value={format.file_url}
-                              onChange={(e) => updateFormat(index, 'file_url', e.target.value)}
-                              placeholder="https://example.com/file.pdf"
-                              className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
-                            />
-                          </div>
+                          {format.format_type !== 'physical' && (
+                            <div className="md:col-span-3">
+                              <label className="block text-sm font-medium text-slate-700 mb-2">File URL</label>
+                              <input
+                                type="url"
+                                value={format.file_url}
+                                onChange={(e) => updateFormat(index, 'file_url', e.target.value)}
+                                placeholder={format.format_type === 'audiobook' ? 'https://example.com/audio.mp3' : 'https://example.com/file.pdf'}
+                                className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-slate-500 focus:outline-none"
+                              />
+                            </div>
+                          )}
 
                           <div className="flex items-center space-x-4">
                             <label className="flex items-center space-x-2">
@@ -387,49 +453,55 @@ export default function AdminPanel({ books, onLogout, onAddBook, onUpdateBook, o
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-slate-100">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Title</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Author</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Formats</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">ISBN</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {books.map((book) => (
-                  <tr key={book.id} className="hover:bg-slate-50">
-                    <td className="px-6 py-4 text-sm text-slate-800">{book.title}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{book.author}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      {book.formats.map(f => f.format_type).join(', ')}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{book.isbn || '-'}</td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end space-x-2">
-                        <button
-                          onClick={() => handleEdit(book)}
-                          className="text-blue-500 hover:text-blue-700 p-2"
-                        >
-                          <Edit className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => onDeleteBook(book.id)}
-                          className="text-red-500 hover:text-red-700 p-2"
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-100">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Title</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Author</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Formats</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">ISBN</th>
+                      <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {books.map((book) => (
+                      <tr key={book.id} className="hover:bg-slate-50">
+                        <td className="px-6 py-4 text-sm text-slate-800">{book.title}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{book.author}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">
+                          {book.formats.map(f => f.format_type).join(', ')}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{book.isbn || '-'}</td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            <button
+                              onClick={() => handleEdit(book)}
+                              className="text-blue-500 hover:text-blue-700 p-2"
+                            >
+                              <Edit className="h-5 w-5" />
+                            </button>
+                            <button
+                              onClick={() => onDeleteBook(book.id)}
+                              className="text-red-500 hover:text-red-700 p-2"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'blogs' && <BlogManagement />}
+        {activeTab === 'orders' && <OrderManagement />}
+        {activeTab === 'settings' && <SiteSettingsManagement />}
       </div>
     </div>
   );

@@ -5,14 +5,21 @@ import LandingPage from './components/LandingPage';
 import BooksView from './components/BooksView';
 import AdminLogin from './components/AdminLogin';
 import AdminPanel from './components/AdminPanel';
+import BlogList from './components/BlogList';
+import BlogDetail from './components/BlogDetail';
+import AboutPage from './components/AboutPage';
+import ContactPage from './components/ContactPage';
+import CheckoutFlow from './components/CheckoutFlow';
 
-type View = 'home' | 'books' | 'ebooks' | 'audiobooks' | 'admin';
+type View = 'home' | 'books' | 'ebooks' | 'audiobooks' | 'blog' | 'about' | 'contact' | 'admin';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('home');
   const [books, setBooks] = useState<BookWithFormats[]>([]);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
+  const [checkoutBook, setCheckoutBook] = useState<BookWithFormats | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -179,7 +186,10 @@ function App() {
   };
 
   const handlePurchase = (bookId: string) => {
-    alert('Purchase functionality would be integrated with a payment system');
+    const book = books.find(b => b.id === bookId);
+    if (book) {
+      setCheckoutBook(book);
+    }
   };
 
   const handleDownload = (formatId: string, url: string, fileFormat?: string) => {
@@ -254,6 +264,25 @@ function App() {
           onAddBook={handleAddBook}
           onUpdateBook={handleUpdateBook}
           onDeleteBook={handleDeleteBook}
+        />
+      )}
+
+      {currentView === 'blog' && !selectedBlogId && (
+        <BlogList onSelectBlog={setSelectedBlogId} />
+      )}
+
+      {currentView === 'blog' && selectedBlogId && (
+        <BlogDetail blogId={selectedBlogId} onBack={() => setSelectedBlogId(null)} />
+      )}
+
+      {currentView === 'about' && <AboutPage />}
+
+      {currentView === 'contact' && <ContactPage />}
+
+      {checkoutBook && (
+        <CheckoutFlow
+          book={checkoutBook}
+          onClose={() => setCheckoutBook(null)}
         />
       )}
     </div>

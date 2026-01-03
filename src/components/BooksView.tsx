@@ -29,7 +29,7 @@ export default function BooksView({ books, formatFilter, onPurchase, onDownload 
   const getTitle = () => {
     switch (formatFilter) {
       case 'physical':
-        return 'Physical Books';
+        return 'Printed Books';
       case 'ebook':
         return 'Free Ebooks';
       case 'audiobook':
@@ -40,7 +40,7 @@ export default function BooksView({ books, formatFilter, onPurchase, onDownload 
   const getDescription = () => {
     switch (formatFilter) {
       case 'physical':
-        return 'Browse our collection of physical books available for purchase';
+        return 'Browse our collection of printed books available for purchase';
       case 'ebook':
         return 'Download free ebooks in PDF, EPUB, and HTML formats';
       case 'audiobook':

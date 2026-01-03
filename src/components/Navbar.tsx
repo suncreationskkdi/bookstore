@@ -1,8 +1,8 @@
-import { BookOpen, Headphones, ShoppingBag, User } from 'lucide-react';
+import { BookOpen, Headphones, ShoppingBag, User, FileText, Info, Mail } from 'lucide-react';
 
 interface NavbarProps {
-  currentView: 'home' | 'books' | 'ebooks' | 'audiobooks' | 'admin';
-  onViewChange: (view: 'home' | 'books' | 'ebooks' | 'audiobooks' | 'admin') => void;
+  currentView: 'home' | 'books' | 'ebooks' | 'audiobooks' | 'blog' | 'about' | 'contact' | 'admin';
+  onViewChange: (view: 'home' | 'books' | 'ebooks' | 'audiobooks' | 'blog' | 'about' | 'contact' | 'admin') => void;
 }
 
 export default function Navbar({ currentView, onViewChange }: NavbarProps) {
@@ -28,7 +28,7 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
               }`}
             >
               <ShoppingBag className="h-5 w-5" />
-              <span>Physical Books</span>
+              <span>Printed Books</span>
             </button>
 
             <button
@@ -53,6 +53,42 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
             >
               <Headphones className="h-5 w-5" />
               <span>Audiobooks</span>
+            </button>
+
+            <button
+              onClick={() => onViewChange('blog')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition ${
+                currentView === 'blog'
+                  ? 'bg-slate-800 text-white'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <FileText className="h-5 w-5" />
+              <span>Blog</span>
+            </button>
+
+            <button
+              onClick={() => onViewChange('about')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition ${
+                currentView === 'about'
+                  ? 'bg-slate-800 text-white'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <Info className="h-5 w-5" />
+              <span>About</span>
+            </button>
+
+            <button
+              onClick={() => onViewChange('contact')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition ${
+                currentView === 'contact'
+                  ? 'bg-slate-800 text-white'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <Mail className="h-5 w-5" />
+              <span>Contact</span>
             </button>
 
             <button

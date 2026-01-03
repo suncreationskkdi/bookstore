@@ -74,7 +74,7 @@ export default function BookDetailModal({ book, onClose, onPurchase, onDownload 
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-2">
                         <ShoppingCart className="h-6 w-6 text-blue-500" />
-                        <span className="text-lg font-semibold text-slate-700">Physical Book</span>
+                        <span className="text-lg font-semibold text-slate-700">Printed Book</span>
                       </div>
                       <span className="text-2xl font-bold text-blue-600">
                         ${physicalFormat.price.toFixed(2)}
